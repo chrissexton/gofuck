@@ -1,7 +1,7 @@
 package main
 
 import (
- "bitbucket.org/phlyingpenguin/go-fuck"
+ "bitbucket.org/phlyingpenguin/gofuck"
 	"bufio"
 	"os"
     "io/ioutil"
