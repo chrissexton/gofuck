@@ -1,9 +1,8 @@
-package main
+package gofuck
 
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 )
 

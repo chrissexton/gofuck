@@ -1,9 +1,15 @@
 package main
 
-import "brainfuck"
+import (
+ "bitbucket.org/phlyingpenguin/go-fuck"
+	"bufio"
+	"os"
+    "io/ioutil"
+)
+
 
 func main() {
-	m := New()
+	m := gofuck.New()
 	instructions := make([]byte, 0)
 
 	// read in the instructions
