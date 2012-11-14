@@ -83,28 +83,24 @@ func (m *Machine) Run(input []byte) {
 	// execute the program
 	for ip := 0; ip < len(input); ip++ {
 		instr := input[ip]
-		if instr == '[' {
-			// if *ptr == 0, jump to ]
-			if m.value() == 0 {
-				for lc := 1; lc > 0; {
-					ip += 1
-					if input[ip] == ']' {
-						lc -= 1
-					} else if input[ip] == '[' {
-						lc += 1
-					}
+		// if *ptr == 0, jump to ]
+		if instr == '[' && m.value() == 0 {
+			for lc := 1; lc > 0; {
+				ip += 1
+				if input[ip] == ']' {
+					lc -= 1
+				} else if input[ip] == '[' {
+					lc += 1
 				}
 			}
-		} else if instr == ']' {
+		} else if instr == ']' && m.value() != 0 {
 			// if *ptr != 0, go back to [
-			if m.value() != 0 {
-				for lc := 1; lc > 0; {
-					ip -= 1
-					if input[ip] == ']' {
-						lc += 1
-					} else if input[ip] == '[' {
-						lc -= 1
-					}
+			for lc := 1; lc > 0; {
+				ip -= 1
+				if input[ip] == ']' {
+					lc += 1
+				} else if input[ip] == '[' {
+					lc -= 1
 				}
 			}
 		} else if instr == '>' {
