@@ -74,25 +74,44 @@ func (m *Machine) Input() {
 	}
 }
 
+func (m *Machine) value() byte {
+	return m.array[m.ptr]
+}
+
 // Run the whole program specified by input
 func (m *Machine) Run(input []byte) {
 	// execute the program
-	loop := -1
-	discard := false
-	for i := 0; i < len(input); i++ {
-		instr := input[i]
-		if discard && instr != ']' {
-			continue
-		} else if instr == '[' {
-			loop = i
-			if m.array[m.ptr] == 0 {
-				discard = true
+	for ip := 0; ip < len(input); ip++ {
+		instr := input[ip]
+		if instr == '[' {
+			// if *ptr == 0, jump to ]
+			if m.value() == 0 {
+				// fmt.Printf("Encountered a [ with *ptr = 0, loopCount=%d\n", loopCount)
+				for lc := 1; lc > 0; {
+					ip += 1
+					if input[ip] == ']' {
+						// fmt.Println("]: Decrementing lc", lc)
+						lc -= 1
+					} else if input[ip] == '[' {
+						// fmt.Println("[: Incrementing lc=", lc)
+						lc += 1
+					}
+				}
 			}
 		} else if instr == ']' {
-			if m.array[m.ptr] != 0 {
-				i = loop
-			} else {
-				discard = false
+			// if *ptr != 0, go back to [
+			if m.value() != 0 {
+				// fmt.Printf("Found a ] with *ptr != 0, loopCount=%d\n", loopCount)
+				for lc := 1; lc > 0; {
+					ip -= 1
+					if input[ip] == ']' {
+						// fmt.Println("]: decrementing lc=", lc)
+						lc += 1
+					} else if input[ip] == '[' {
+						// fmt.Println("[: incrementing lc=", lc)
+						lc -= 1
+					}
+				}
 			}
 		} else if instr == '>' {
 			m.PtrIncr()
