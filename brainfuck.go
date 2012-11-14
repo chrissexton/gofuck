@@ -1,3 +1,4 @@
+// gofuck is a simple brainfuck interpreter written in Go
 package gofuck
 
 import (
