@@ -23,6 +23,7 @@ type Machine struct {
 	array  []byte
 	ptr    int
 	reader *bufio.Reader
+	writer io.Writer
 
 	// InstructionLimit prevents a runaway execution if running under a controlled environment
 	InstructionLimit int
@@ -33,15 +34,16 @@ type Machine struct {
 
 // Returns a new machine with standard memory size
 func NewStdin() *Machine {
-	return New(os.Stdin)
+	return New(os.Stdin, os.Stdout)
 }
 
-func New(in io.Reader) *Machine {
+func New(in io.Reader, out io.Writer) *Machine {
 	bytes := make([]byte, MEM_STD)
 	return &Machine{
 		array:  bytes,
 		ptr:    0,
 		reader: bufio.NewReader(in),
+		writer: out,
 		InstructionLimit: 0,
 		MemMax: 3000000,
 	}
@@ -80,7 +82,7 @@ func (m *Machine) ByteDecr() {
 
 // Implements the '.' command
 func (m *Machine) Output() {
-	fmt.Printf("%c", m.array[m.ptr])
+	fmt.Fprintf(m.writer, "%c", m.array[m.ptr])
 }
 
 // Implements the ',' command
