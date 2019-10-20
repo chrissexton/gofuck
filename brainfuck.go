@@ -4,6 +4,7 @@ package gofuck
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -19,12 +20,16 @@ type Machine struct {
 }
 
 // Returns a new machine with standard memory size
-func New() *Machine {
+func NewStdin() *Machine {
+	return New(os.Stdin)
+}
+
+func New(in io.Reader) *Machine {
 	bytes := make([]byte, MEM_STD)
 	return &Machine{
 		array:  bytes,
 		ptr:    0,
-		reader: bufio.NewReader(os.Stdin),
+		reader: bufio.NewReader(in),
 	}
 }
 

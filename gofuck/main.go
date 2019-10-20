@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	m := gofuck.New()
+	m := gofuck.NewStdin()
 	instructions := make([]byte, 0)
 
 	// read in the instructions
