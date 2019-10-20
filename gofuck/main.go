@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -14,15 +15,19 @@ func main() {
 
 	// read in the instructions
 	if len(os.Args) < 2 {
-		panic("No input given")
+		fmt.Printf("No input given")
+		return
 	}
 
 	file, err := os.Open(os.Args[1])
 	reader := bufio.NewReader(file)
 	instructions, err = ioutil.ReadAll(reader)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error: %s\n", err)
+		return
 	}
 
-	m.Run(instructions)
+	if err := m.Run(instructions); err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
 }

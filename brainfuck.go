@@ -9,14 +9,26 @@ import (
 )
 
 const (
-	MEM_MAX = 3000000
 	MEM_STD = 30000
 )
+
+type ErrMemoryOverflow struct {}
+func (e ErrMemoryOverflow) Error() string { return "Memory Overflow" }
+type ErrMemoryUnderflow struct {}
+func (e ErrMemoryUnderflow) Error() string { return "Memory Underflow" }
+type ErrInstructionLimit struct {}
+func (e ErrInstructionLimit) Error() string { return "Instruction Limit Reached" }
 
 type Machine struct {
 	array  []byte
 	ptr    int
 	reader *bufio.Reader
+
+	// InstructionLimit prevents a runaway execution if running under a controlled environment
+	InstructionLimit int
+
+	// MemMax is the limit of how large memory can expand
+	MemMax int
 }
 
 // Returns a new machine with standard memory size
@@ -30,33 +42,34 @@ func New(in io.Reader) *Machine {
 		array:  bytes,
 		ptr:    0,
 		reader: bufio.NewReader(in),
+		InstructionLimit: 0,
+		MemMax: 3000000,
 	}
 }
 
 // Implements '>'
-func (m *Machine) PtrIncr() {
+func (m *Machine) PtrIncr() error {
 	if m.ptr >= len(m.array)-1 {
 		m.array = append(m.array, 0)
 	}
 	m.ptr += 1
-	if m.ptr > MEM_MAX {
-		panic("Memory overflow")
+	if m.ptr > m.MemMax {
+		return ErrMemoryOverflow{}
 	}
+	return nil
 }
 
 // Implements '<'
-func (m *Machine) PtrDecr() {
+func (m *Machine) PtrDecr() error {
 	if m.ptr == 0 {
-		panic("Memory underflow")
+		return ErrMemoryUnderflow{}
 	}
 	m.ptr -= 1
+	return nil
 }
 
 // Implements '+'
 func (m *Machine) ByteIncr() {
-	if m.ptr > len(m.array)-1 {
-		fmt.Printf("Memory overflow, ptr=%d\n", m.ptr)
-	}
 	m.array[m.ptr] += 1
 }
 
@@ -85,9 +98,13 @@ func (m *Machine) value() byte {
 }
 
 // Run the whole program specified by input
-func (m *Machine) Run(input []byte) {
-	// execute the program
+func (m *Machine) Run(input []byte) error {
+	instrCount := 0
 	for ip := 0; ip < len(input); ip++ {
+		instrCount++
+		if m.InstructionLimit > 0 && instrCount > m.InstructionLimit {
+			return ErrInstructionLimit{}
+		}
 		instr := input[ip]
 		// if *ptr == 0, jump to ]
 		if instr == '[' && m.value() == 0 {
@@ -110,9 +127,13 @@ func (m *Machine) Run(input []byte) {
 				}
 			}
 		} else if instr == '>' {
-			m.PtrIncr()
+			if err := m.PtrIncr(); err != nil {
+				return err
+			}
 		} else if instr == '<' {
-			m.PtrDecr()
+			if err := m.PtrDecr(); err != nil {
+				return err
+			}
 		} else if instr == '+' {
 			m.ByteIncr()
 		} else if instr == '-' {
@@ -124,4 +145,6 @@ func (m *Machine) Run(input []byte) {
 		}
 
 	}
+
+	return nil
 }
