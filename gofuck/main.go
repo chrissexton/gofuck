@@ -1,12 +1,12 @@
 package main
 
 import (
- "bitbucket.org/phlyingpenguin/gofuck"
 	"bufio"
+	"io/ioutil"
 	"os"
-    "io/ioutil"
-)
 
+	"github.com/chrissexton/gofuck"
+)
 
 func main() {
 	m := gofuck.New()
